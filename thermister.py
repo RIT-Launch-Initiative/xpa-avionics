@@ -1,5 +1,5 @@
 import os, math, time
-from gpiozero import InputDevice
+from gpiozero import InputDevice, OutputDevice
 import csv
 import adafruit_lps2x
 import board
@@ -10,7 +10,7 @@ import board
 
 # init constants
 # TODO: some still need to be changed based on testing
-SAMPLE_INTERVAL: float = .1 # how often data is sampled (seconds)
+SAMPLE_INTERVAL: float = .5 # how often data is sampled (seconds)
 ROLLING_AVERAGE_DURATION: float = 10 # number of seconds of data to average
 TEMP_UPPER_LIMIT: float = 200 # temp at which the heater should be turned off (celsius)
 TEMP_LOWER_LIMIT: float = 180 # temp at which the heater should be turned on (celsius)
@@ -18,13 +18,13 @@ ALTITUDE_DISREEF: float = 1500 # altitude to start melting the wire (ft)
 ROLLING_AVERAGE_SAMPLES: int = math.ceil(ROLLING_AVERAGE_DURATION / SAMPLE_INTERVAL) # number of samples to average
 
 # init gpio, i2c
-apogee_detect = InputDevice(4) # gpio pin to detect apogee from quark
+apogee_detect = InputDevice(4) # gpio pin to detect apogee from quarkde
 heater = OutputDevice(6) # gpio pin to activate heater
 # TODO: choose correct gpio pin for thermister and correct inputdevice
 thermistor = InputDevice(7) # gpio pin to read thermister
 i2c = board.I2C() # i2c connection to read accelerometer data from icm 20649
 #icm = adafruit_icm20x.ICM20649(i2c) # accelerometer object
-lps = adafruit_lps2x.LPS25(i2c) # barometer / altimeter object
+lps = adafruit_lps2x.LPS22(i2c) # barometer / altimeter object
 
 
 # init variables
@@ -37,12 +37,22 @@ lps = adafruit_lps2x.LPS25(i2c) # barometer / altimeter object
 
 # redundant check for boost
 # wait for apogee
+print('waiting for apogee signal from quark...')
 while(not apogee_detect.is_active): # wait until quark sends apogee signal
   time.sleep(SAMPLE_INTERVAL)
-
+print('apogee reached.')
 # apoogee reached
 
-current_altitude = lps.altitude # get altitude from lps sensor
+def altitude(pressure: float) -> float:
+    """
+    Convert pressure to altitude
+    """
+    return 145366.45 * (1 - (pressure / 1013.25)**(1/5.255))
+
+current_altitude = altitude(lps.pressure) # get altitude from lps sensor
+print(current_altitude)
+offset = current_altitude
+print(current_altitude - offset)
 
 # descent, but not dis-reefing yet
 # start warming up heater
@@ -60,7 +70,8 @@ while(current_altitude > ALTITUDE_DISREEF): # while we are above the dis-reef al
         heater.off() # turn off heater
     time.sleep(SAMPLE_INTERVAL)
     # update altitude for next iteration
-    current_altitude = lps.altitude
+    current_altitude = altitude(lps.pressure) - offset
+    print(current_altitude)
 
 # dis-reefing altitude reached
 heater.on() # turn on heater fully
