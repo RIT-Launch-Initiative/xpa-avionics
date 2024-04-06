@@ -75,3 +75,12 @@ camera.wait_recording(POST_BOOST_DURATION)
 camera.stop_recording()
 
 
+def IMU_read() -> bool:
+    a = icm.acceleration
+    mag = sqrt(a[0]^2+a[1]^2+a[2]^2)
+    return (mag > 5)
+
+def quark_read():
+    # TODO: implement quark read from serial
+    # if quark accelerometer magnitude > 5, return True
+    return False
