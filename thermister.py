@@ -9,6 +9,7 @@ import board
 # implement lookup table
 
 # init constants
+# TODO: some still need to be changed based on testing
 SAMPLE_INTERVAL: float = .1 # how often data is sampled (seconds)
 ROLLING_AVERAGE_DURATION: float = 10 # number of seconds of data to average
 TEMP_UPPER_LIMIT: float = 200 # temp at which the heater should be turned off (celsius)
@@ -43,11 +44,11 @@ while(not apogee_detect.is_active): # wait until quark sends apogee signal
 
 current_altitude = lps.altitude # get altitude from lps sensor
 
-# descent, but not disreefing yet
+# descent, but not dis-reefing yet
 # start warming up heater
-while(current_altitude > ALTITUDE_DISREEF): # while we are above the disreef altitude
+while(current_altitude > ALTITUDE_DISREEF): # while we are above the dis-reef altitude
     # read thermister
-    voltage = thermistor.value # read voltage from thermister
+    voltage = thermistor.value # read voltage from thermistor
     # TODO: convert voltage to temperature
     temp = temp(voltage) # convert voltage to temp via lookup table
 
@@ -61,7 +62,7 @@ while(current_altitude > ALTITUDE_DISREEF): # while we are above the disreef alt
     # update altitude for next iteration
     current_altitude = lps.altitude
 
-# disreefing altitude reached
+# dis-reefing altitude reached
 heater.on() # turn on heater fully
 # wait for deployment
 time.sleep(20)
