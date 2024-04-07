@@ -26,32 +26,7 @@ thermistor = InputDevice(7) # gpio pin to read thermister
 i2c = board.I2C() # i2c connection to read accelerometer data from icm 20649
 #icm = adafruit_icm20x.ICM20649(i2c) # accelerometer object
 lps = adafruit_lps2x.LPS22(i2c) # barometer / altimeter object
-nau7802 = NAU7802(board.I2C(), address=0x2A, active_channels=2)
-
-def zero_channel():
-    """Initiate internal calibration for current channel.Use when scale is started,
-    a new channel is selected, or to adjust for measurement drift. Remove weight
-    and tare from load cell before executing."""
-    print(
-        "channel %1d calibrate.INTERNAL: %5s"
-        % (nau7802.channel, nau7802.calibrate("INTERNAL"))
-    )
-    print(
-        "channel %1d calibrate.OFFSET:   %5s"
-        % (nau7802.channel, nau7802.calibrate("OFFSET"))
-    )
-    print("...channel %1d zeroed" % nau7802.channel)
-    
-def read_raw_value(samples=2):
-    """Read and average consecutive raw sample values. Return average raw value."""
-    sample_sum = 0
-    sample_count = samples
-    while sample_count > 0:
-        while not nau7802.available():
-            pass
-        sample_sum = sample_sum + nau7802.read()
-        sample_count -= 1
-    return int(sample_sum / samples)
+nau7802 = NAU7802()
 
 def altitude(pressure: float) -> float:
     """
@@ -70,19 +45,9 @@ def main():
     enabled = nau7802.enable(True)
     print(f"NAU7802 enabled: {enabled}")
     
-    nau7802.channel = 1
-    zero_channel()  # Calibrate and zero channel
-    nau7802.channel = 2
-    zero_channel()  # Calibrate and zero channel
-    
     while True:
-        nau7802.channel = 1
-        value = read_raw_value()
-        print("channel %1.0f raw value: %7.0f" % (nau7802.channel, value))
-
-        nau7802.channel = 2
-        value = read_raw_value()
-        print("channel %1.0f raw value: %7.0f" % (nau7802.channel, value))
+        value = nau7802.getReading() 
+        print("raw value: %7.0f" % (value))
 
     print("READY")
     
