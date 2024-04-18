@@ -55,11 +55,11 @@ while(not(IMU_read() and quark_read())): # if either IMU acceleration magnitude 
     # when buffer_counter reaches 0, stop recording current buffer and start a new one
     if(buffer_counter <= 0):
         # stop recording current buffer and start a new buffer
-        camera.split_recording('%d.h264' % file_number.zfill(4))
+        camera.split_recording('%d.h264' % str(file_number).zfill(4))
 		# delete oldest buffer if we have more than BUFF_COUNT buffers
         if(file_number > BUFF_COUNT):
             # delete oldest buffer
-            os.remove('%d.h264' % (file_number-1).zfill(4))
+            os.remove('%d.h264' % str(file_number-1).zfill(4))
         file_number+=1 # increment file number for next buffer
         buffer_counter = BUFFER_COUNTER_MAX # reset buffer counter
     time.sleep(SAMPLE_INTERVAL) # wait for next sample
