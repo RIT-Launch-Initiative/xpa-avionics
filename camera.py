@@ -40,7 +40,7 @@ buffer_counter: int = BUFFER_COUNTER_MAX # variable to decrement to 0 before mak
 file_number: int = 1 # file number
 
 # init camera
-camera = PiCamera()
+camera = Picamera2()
 camera.resolution = (1024, 768) # (2592, 1944)
 camera.framerate = 60
 
