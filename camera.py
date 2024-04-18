@@ -1,5 +1,5 @@
 import time
-from picamera import PiCamera
+from picamera2 import Picamera2
 from gpiozero import OutputDevice
 import serial, csv
 import threading
