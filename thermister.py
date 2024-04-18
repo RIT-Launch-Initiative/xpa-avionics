@@ -1,5 +1,5 @@
 import os, math, time
-from gpiozero import InputDevice
+from gpiozero import InputDevice,OutputDevice
 import csv
 import adafruit_lps2x
 from cedargrove_nau7802 import NAU7802, LDOVoltage
@@ -11,7 +11,7 @@ import board
 
 # init constants
 # TODO: some still need to be changed based on testing
-SAMPLE_INTERVAL: float = .1 # how often data is sampled (seconds)
+SAMPLE_INTERVAL: float = .5 # how often data is sampled (seconds)
 ROLLING_AVERAGE_DURATION: float = 10 # number of seconds of data to average
 ROLLING_AVERAGE_SAMPLES: int = math.ceil(ROLLING_AVERAGE_DURATION / SAMPLE_INTERVAL) # number of samples to average
 # heater constants
@@ -33,7 +33,7 @@ thermistor = InputDevice(7) # gpio pin to read thermister
 i2c = board.I2C() # i2c connection to read accelerometer data from icm 20649
 #icm = adafruit_icm20x.ICM20649(i2c) # accelerometer object
 lps = adafruit_lps2x.LPS22(i2c) # barometer / altimeter object
-nau7802 = NAU7802()
+nau7802 = NAU7802(i2c)
 
 def altitude(pressure: float) -> float:
     """
@@ -80,15 +80,19 @@ while(current_altitude > ALTITUDE_DISREEF): # while we are above the dis-reef al
     # read thermistor
     voltage = thermistor.value # read voltage from thermistor
     # TODO: convert voltage to temperature
+    print('voltage: ', voltage)
     temperature = temp(voltage) # convert voltage to temp via lookup table
+    print('temperature: ', temperature)
     #temp = temp(voltage) # convert voltage to temp via lookup table
 
     # check if we need to turn on or off the heater
     # by trying to maintain a temperature range
     if(temp < TEMP_LOWER_LIMIT):
         heater.on() # turn on heater 
+        print('heater on')
     if(temp > TEMP_UPPER_LIMIT):
         heater.off() # turn off heater
+        print('heater off')
     time.sleep(SAMPLE_INTERVAL)
     # update altitude for next iteration
     current_altitude = altitude(lps.pressure) - offset
