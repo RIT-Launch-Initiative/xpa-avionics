@@ -1,5 +1,6 @@
 import time
 from picamera2 import Picamera2
+from picamera2.encoders import H264Encoder
 from gpiozero import OutputDevice
 import serial, csv
 import threading
@@ -41,11 +42,12 @@ file_number: int = 1 # file number
 
 # init camera
 camera = Picamera2()
+camera.configure(video_config)
 camera.resolution = (1024, 768) # (2592, 1944)
 camera.framerate = 60
-
+encoder = H264Encoder(20000000)
 # begin recording first buffer
-camera.start_recording('%d.h264'%file_number)
+camera.start_recording(encoder,'%d.h264'%file_number)
 
 file_number+=1 # increment file number for next buffer
 
