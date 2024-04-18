@@ -6,6 +6,7 @@ import serial, csv
 import threading
 import adafruit_icm20x, board
 import os, math
+import time
 
 
 # camera script
@@ -73,7 +74,7 @@ while(not(IMU_read() and quark_read())): # if either IMU acceleration magnitude 
 smoke.on()
     
 # wait 15 minutes
-camera.wait_recording(POST_BOOST_DURATION)
+time.sleep(POST_BOOST_DURATION)
 # stop recording the final file and save to (flightRecording)
 camera.stop_recording()
 
