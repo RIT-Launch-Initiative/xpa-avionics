@@ -107,11 +107,11 @@ def main():
     while (True):
         current_altitude = altitude(lps.pressure) - offset
         print(current_altitude)
-        if current_altitude > 1000:
-            time.sleep(500)
+        if current_altitude > 6: # TODO: 
+            time.sleep(.5)
             current_altitude = altitude(lps.pressure) - offset
             print(current_altitude)
-            if current_altitude > 1000:
+            if current_altitude > 6:
                 break
     
     print('boost detected')
@@ -131,7 +131,7 @@ def main():
         n+=1
         if n > 2:
             n-=3
-        time.sleep(.33)
+        time.sleep(.66) # TODO: 
         """ 
         if current_altitude > max_altitude:
             max_altitude = current_altitude
