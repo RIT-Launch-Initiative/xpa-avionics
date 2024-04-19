@@ -1,5 +1,5 @@
 import os, math, time
-from gpiozero import InputDevice,OutputDevice
+from gpiozero import InputDevice,OutputDevice,Button
 import csv
 import adafruit_lps2x
 #3import adafruit_icm20x
@@ -23,7 +23,7 @@ ALTITUDE_DISREEF: float = 1500 # altitude to start melting the wire (ft) # TODO:
 
 
 # init gpio, i2c
-apogee_detect = InputDevice(15) # gpio pin to detect apogee from quark # TODO:
+apogee_detect = Button(2) # gpio pin to detect apogee from quark # TODO:
 heater = OutputDevice(6) # gpio pin to activate heater # TODO: 
 i2c = board.I2C() # i2c connection to read accelerometer data from icm 20649
 #icm = adafruit_icm20x.ICM20649(i2c) # accelerometer object
@@ -98,8 +98,8 @@ def main():
     offset = current_altitude
     print(current_altitude - offset)
 
-    while(not apogee_detect.is_active): # wait until quark sends apogee signal
-        time.sleep(SAMPLE_INTERVAL)
+    
+    apogee_detect.wait_for_press() # wait until quark sends apogee signal
     print("wooooooooooo")
 
     # apogee reached
