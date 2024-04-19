@@ -65,23 +65,23 @@ def read_raw_value(samples=2):
     return int(sample_sum / samples)
 
 def main():
-    enabled = nau7802.enable(True)
-    nau7802.calibrate("INTERNAL")
-    nau7802.calibrate("OFFSET")
-    nau7802.calibrate("GAIN") #unplug thermistor when doing gain calibration
-    print(f"NAU7802 enabled: {enabled}")
-    nau7802.channel = 1
+    time.sleep(3)
+    nau7802.channel=1
+    zero_channel()
+    
 
     while True:
-        while not nau7802.available():
-            pass
-        print(nau7802.read())
+        nau7802.channel=1
+        value=read_raw_value()
+        print("%7.0f"%value)
 
     print("READY")
     
     # wait for boost
     # while(not IMU_read() or not quark_read()):
     #   time.sleep(sampleTimeDelay)
+
+main()
 
 # redundant check for boost
 # wait for apogee
