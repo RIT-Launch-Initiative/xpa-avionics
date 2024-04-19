@@ -11,7 +11,7 @@ import board
 # implement lookup table
 
 # init constants
-SAMPLE_INTERVAL: float = .5 # how often data is sampled (seconds) # TODO:
+SAMPLE_INTERVAL: float = .15 # how often data is sampled (seconds) # TODO:
 ROLLING_AVERAGE_DURATION: float = 10 # number of seconds of data to average # TODO: 
 ROLLING_AVERAGE_SAMPLES: int = math.ceil(ROLLING_AVERAGE_DURATION / SAMPLE_INTERVAL) # number of samples to average
 # heater constants
@@ -19,7 +19,7 @@ TEMP_UPPER_LIMIT: float = 150 # temp at which the heater should be turned off (c
 TEMP_LOWER_LIMIT: float = 130 # temp at which the heater should be turned on (celsius)
 R_UPPER_LIMIT: float = 1770 # resistance at which the heater should be turned off (ohms)
 R_LOWER_LIMIT: float = 2970 # resistance at which the heater should be turned on 
-ALTITUDE_DISREEF: float = 1500 # altitude to start melting the wire (ft) # TODO:
+ALTITUDE_DISREEF: float = 20 # altitude to start melting the wire (ft) # TODO:
 
 
 # init gpio, i2c
