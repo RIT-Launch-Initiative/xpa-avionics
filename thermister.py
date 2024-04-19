@@ -23,12 +23,20 @@ ALTITUDE_DISREEF: float = 1500 # altitude to start melting the wire (ft) # TODO:
 
 
 # init gpio, i2c
-apogee_detect = Button(2) # gpio pin to detect apogee from quark # TODO:
+apogee_detect = Button(15) # gpio pin to detect apogee from quark # TODO:
 heater = OutputDevice(6) # gpio pin to activate heater # TODO: 
 i2c = board.I2C() # i2c connection to read accelerometer data from icm 20649
 #icm = adafruit_icm20x.ICM20649(i2c) # accelerometer object
 lps = adafruit_lps2x.LPS22(i2c) # barometer / altimeter object
 nau7802 = NAU7802(board.I2C(), address=0x2A, active_channels=1)
+ser = serial.Serial( # serial connection to read accelerometer data from quark
+    port='/dev/ttyS0', #Replace ttyS0 with ttyAM0 for Pi1,Pi2,Pi0
+    baudrate = 9600, 
+    parity=serial.PARITY_NONE,
+    stopbits=serial.STOPBITS_ONE,
+    bytesize=serial.EIGHTBITS,
+    timeout=1
+)
 nau7802.gain = 1
 
 
@@ -86,23 +94,53 @@ def main():
 
     print("READY")
     
-    # wait for boost
-    #while(not imu_read()): # or not quark_read()):
-    #    time.sleep(SAMPLE_INTERVAL)
-        
-    # boost detected
-    
-    # wait for apogee
     current_altitude = altitude(lps.pressure) # get altitude from lps sensor
     print(current_altitude)
     offset = current_altitude
     print(current_altitude - offset)
-
     
-    apogee_detect.wait_for_press() # wait until quark sends apogee signal
-    print("wooooooooooo")
-
-    # apogee reached
+    # wait for boost
+    #while(not imu_read()): # or not quark_read()):
+    #    time.sleep(SAMPLE_INTERVAL)
+    
+    # wait for boost
+    while (True):
+        current_altitude = altitude(lps.pressure) - offset
+        print(current_altitude)
+        if current_altitude > 1000:
+            time.sleep(500)
+            current_altitude = altitude(lps.pressure) - offset
+            print(current_altitude)
+            if current_altitude > 1000:
+                break
+    
+    print('boost detected')
+        
+    # boost detected
+    
+    # wait for apogee
+    
+    alts = [0, 0, 0]
+    n=0
+    while (True):
+        current_altitude = altitude(lps.pressure) - offset
+        print(current_altitude)
+        if alts[0] > (current_altitude):
+            break
+        alts[0] = current_altitude
+        n+=1
+        if n > 2:
+            n-=3
+        time.sleep(.33)
+        """ 
+        if current_altitude > max_altitude:
+            max_altitude = current_altitude
+        if (current_altitude < ALTITUDE_DISREEF) & (max_altitude > (ALTITUDE_DISREEF+1000)):
+            break
+         """    
+    print('descend detected')
+    # descent state
+    # wait for dis-reefing altitude
 
     # descent, but not dis-reefing yet
     # start warming up heater
@@ -132,6 +170,9 @@ def main():
         # update altitude for next iteration
         current_altitude = altitude(lps.pressure) - offset
         print(current_altitude)
+        if (current_altitude < ALTITUDE_DISREEF):
+            break
+        
 
     # dis-reefing altitude reached
     print('disreef')
