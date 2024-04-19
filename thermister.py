@@ -32,8 +32,9 @@ heater = OutputDevice(6) # gpio pin to activate heater
 i2c = board.I2C() # i2c connection to read accelerometer data from icm 20649
 #icm = adafruit_icm20x.ICM20649(i2c) # accelerometer object
 lps = adafruit_lps2x.LPS22(i2c) # barometer / altimeter object
-nau7802 = NAU7802(i2c, address=0x2A, active_channels=1)
+nau7802 = NAU7802(board.I2C(), address=0x2A, active_channels=1)
 nau7802.gain = 1
+
 
 
 def altitude(pressure: float) -> float:
@@ -65,13 +66,16 @@ def read_raw_value(samples=2):
 
 def main():
     enabled = nau7802.enable(True)
+    nau7802.calibrate("INTERNAL")
+    nau7802.calibrate("OFFSET")
+    nau7802.calibrate("GAIN") #unplug thermistor when doing gain calibration
     print(f"NAU7802 enabled: {enabled}")
     nau7802.channel = 1
-    zero_channel()
-    
+
     while True:
-        value = read_raw_value()
-        print("raw value: %7.0f" % (value))
+        while not nau7802.available():
+            pass
+        print(nau7802.read())
 
     print("READY")
     
