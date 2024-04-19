@@ -45,6 +45,8 @@ def altitude(pressure: float) -> float:
 
 
 def temp(voltage: float) -> float:
+    R = -4700*voltage/(voltage-3)
+    print(R)
     # 130C = 2.94V
     # 150C = 1.77V
     
