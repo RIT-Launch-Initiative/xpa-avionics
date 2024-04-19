@@ -29,11 +29,12 @@ SERIES_RESISTOR: float = 10000 # The value of the 'other' resistor
 apogee_detect = InputDevice(4) # gpio pin to detect apogee from quark
 heater = OutputDevice(6) # gpio pin to activate heater
 # TODO: choose correct gpio pin for thermister and correct inputdevice
-thermistor = InputDevice(7) # gpio pin to read thermister
 i2c = board.I2C() # i2c connection to read accelerometer data from icm 20649
 #icm = adafruit_icm20x.ICM20649(i2c) # accelerometer object
 lps = adafruit_lps2x.LPS22(i2c) # barometer / altimeter object
-nau7802 = NAU7802(i2c)
+nau7802 = NAU7802(i2c, address=0x2A, active_channels=1)
+nau7802.gain = 1
+
 
 def altitude(pressure: float) -> float:
     """
@@ -47,13 +48,29 @@ def temp(voltage: float) -> float:
     Convert voltage to temperature
     """
     
+def zero_channel():
+    print("channel %d zero offset: %7.0f" % (nau7802.channel, nau7802.calibrate("INTERNAL")))
+    print("channel %d calibrate GAIN: %7.0f" % (nau7802.channel, nau7802.calibrate("GAIN")))
+    print("...channel %1d zeroed" % nau7802.channel)
+
+def read_raw_value(samples=2):
+    sample_sum=0
+    sample_count=samples
+    while sample_count > 0:
+        while not nau7802.available():
+            pass
+        sample_sum += nau7802.read()
+        sample_count -= 1
+    return int(sample_sum / samples)
 
 def main():
     enabled = nau7802.enable(True)
     print(f"NAU7802 enabled: {enabled}")
+    nau7802.channel = 1
+    zero_channel()
     
     while True:
-        value = nau7802.getReading() 
+        value = read_raw_value()
         print("raw value: %7.0f" % (value))
 
     print("READY")
@@ -87,10 +104,10 @@ while(current_altitude > ALTITUDE_DISREEF): # while we are above the dis-reef al
 
     # check if we need to turn on or off the heater
     # by trying to maintain a temperature range
-    if(temp < TEMP_LOWER_LIMIT):
+    if(temperature < TEMP_LOWER_LIMIT):
         heater.on() # turn on heater 
         print('heater on')
-    if(temp > TEMP_UPPER_LIMIT):
+    if(temperature > TEMP_UPPER_LIMIT):
         heater.off() # turn off heater
         print('heater off')
     time.sleep(SAMPLE_INTERVAL)
