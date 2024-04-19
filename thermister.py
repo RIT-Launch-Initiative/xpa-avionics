@@ -45,6 +45,9 @@ def altitude(pressure: float) -> float:
 
 
 def temp(voltage: float) -> float:
+    # 130C = 2.94V
+    # 150C = 1.77V
+    
     """
     Convert voltage to temperature
     """
@@ -73,7 +76,10 @@ def main():
     while True:
         nau7802.channel=1
         value=read_raw_value()
-        print("%7.0f"%value)
+        V=float("%7.0f"%value)
+        print(V)
+        T=temp(V)
+        print(T)
 
     print("READY")
     
