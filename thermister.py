@@ -29,14 +29,14 @@ i2c = board.I2C() # i2c connection to read accelerometer data from icm 20649
 #icm = adafruit_icm20x.ICM20649(i2c) # accelerometer object
 lps = adafruit_lps2x.LPS22(i2c) # barometer / altimeter object
 nau7802 = NAU7802(board.I2C(), address=0x2A, active_channels=1)
-ser = serial.Serial( # serial connection to read accelerometer data from quark
-    port='/dev/ttyS0', #Replace ttyS0 with ttyAM0 for Pi1,Pi2,Pi0
-    baudrate = 9600, 
-    parity=serial.PARITY_NONE,
-    stopbits=serial.STOPBITS_ONE,
-    bytesize=serial.EIGHTBITS,
-    timeout=1
-)
+# ser = serial.Serial( # serial connection to read accelerometer data from quark
+#     port='/dev/ttyS0', #Replace ttyS0 with ttyAM0 for Pi1,Pi2,Pi0
+#     baudrate = 9600, 
+#     parity=serial.PARITY_NONE,
+#     stopbits=serial.STOPBITS_ONE,
+#     bytesize=serial.EIGHTBITS,
+#     timeout=1
+# )
 nau7802.gain = 1
 
 
