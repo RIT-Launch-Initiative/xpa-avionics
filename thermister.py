@@ -166,14 +166,14 @@ def main():
         # check if we need to turn on or off the heater
         # by trying to maintain a temperature range
         #if(temperature < TEMP_LOWER_LIMIT):
-        if(R > TEMP_LOWER_LIMIT):
+        if(R > R_LOWER_LIMIT):
             if (flag == 1):
                 break
             heater.on() # turn on heater 
             print('heater on')
             GPIO.output(20, 1)       # set port/pin value to 1/GPIO.HIGH/Truex  
         #if(temperature > TEMP_UPPER_LIMIT):
-        if(R < TEMP_UPPER_LIMIT):
+        if(R < R_UPPER_LIMIT):
             flag = 1
             heater.off() # turn off heater
             print('heater off')
