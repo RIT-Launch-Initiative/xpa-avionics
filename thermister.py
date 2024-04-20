@@ -93,8 +93,8 @@ def main():
     time.sleep(3)
     nau7802.channel=1
     zero_channel()
-    GPIO.setmode(GPIO.BOARD)            # choose BCM or BOARD  
-    GPIO.setup(38, GPIO.OUT) # set a port/pin as an output   
+    GPIO.setmode(GPIO.BCM)            # choose BCM or BOARD  
+    GPIO.setup(20, GPIO.OUT) # set a port/pin as an output   
 
     print("READY")
     
@@ -150,6 +150,7 @@ def main():
 
     # descent, but not dis-reefing yet
     # start warming up heater
+    flag = 0
     while(True): # current_altitude > ALTITUDE_DISREEF): # while we are above the dis-reef altitude
         # read thermistor
         nau7802.channel=1
@@ -166,13 +167,17 @@ def main():
         # by trying to maintain a temperature range
         #if(temperature < TEMP_LOWER_LIMIT):
         if(R > TEMP_LOWER_LIMIT):
+            if (flag == 1):
+                break
             heater.on() # turn on heater 
             print('heater on')
-            GPIO.output(38, 1)       # set port/pin value to 1/GPIO.HIGH/True  
+            GPIO.output(20, 1)       # set port/pin value to 1/GPIO.HIGH/Truex  
         #if(temperature > TEMP_UPPER_LIMIT):
         if(R < TEMP_UPPER_LIMIT):
+            flag = 1
             heater.off() # turn off heater
             print('heater off')
+            GPIO.output(20, 0)
         # update altitude for next iteration
         current_altitude = altitude(lps.pressure) - offset
         print(current_altitude)
@@ -182,7 +187,7 @@ def main():
 
     # dis-reefing altitude reached
     print('disreef')
-    heater.on() # turn on heater fully
+    GPIO.output(20, 1) # turn on heater fully
     # wait for deployment
     time.sleep(20)
     heater.off() # turn off heater
