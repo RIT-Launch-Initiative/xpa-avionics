@@ -5,6 +5,8 @@ import adafruit_lps2x
 #3import adafruit_icm20x
 from cedargrove_nau7802 import NAU7802, LDOVoltage
 import board
+import RPi.GPIO as GPIO           # import RPi.GPIO module  
+
 
 # thermistor script
 
@@ -19,12 +21,12 @@ TEMP_UPPER_LIMIT: float = 150 # temp at which the heater should be turned off (c
 TEMP_LOWER_LIMIT: float = 130 # temp at which the heater should be turned on (celsius)
 R_UPPER_LIMIT: float = 1770 # resistance at which the heater should be turned off (ohms)
 R_LOWER_LIMIT: float = 2970 # resistance at which the heater should be turned on 
-ALTITUDE_DISREEF: float = 20 # altitude to start melting the wire (ft) # TODO:
+ALTITUDE_DISREEF: float = 1000 # altitude to start melting the wire (ft) # TODO:
 
 
 # init gpio, i2c
 apogee_detect = Button(15) # gpio pin to detect apogee from quark # TODO:
-heater = OutputDevice(6) # gpio pin to activate heater # TODO: 
+heater = OutputDevice(20) # gpio pin to activate heater # TODO: 
 i2c = board.I2C() # i2c connection to read accelerometer data from icm 20649
 #icm = adafruit_icm20x.ICM20649(i2c) # accelerometer object
 lps = adafruit_lps2x.LPS22(i2c) # barometer / altimeter object
@@ -91,6 +93,8 @@ def main():
     time.sleep(3)
     nau7802.channel=1
     zero_channel()
+    GPIO.setmode(GPIO.BCM)            # choose BCM or BOARD  
+    GPIO.setup(20, GPIO.OUT) # set a port/pin as an output   
 
     print("READY")
     
@@ -105,6 +109,7 @@ def main():
     
     # wait for boost
     while (True):
+        break
         current_altitude = altitude(lps.pressure) - offset
         print(current_altitude)
         if current_altitude > 6: # TODO: 
@@ -117,12 +122,13 @@ def main():
     print('boost detected')
         
     # boost detected
-    
+
     # wait for apogee
     
     alts = [0, 0, 0]
     n=0
     while (True):
+        break
         current_altitude = altitude(lps.pressure) - offset
         print(current_altitude)
         if alts[0] > (current_altitude):
@@ -144,7 +150,7 @@ def main():
 
     # descent, but not dis-reefing yet
     # start warming up heater
-    while(current_altitude > ALTITUDE_DISREEF): # while we are above the dis-reef altitude
+    while(True): # current_altitude > ALTITUDE_DISREEF): # while we are above the dis-reef altitude
         # read thermistor
         nau7802.channel=1
         value=read_raw_value()
@@ -162,16 +168,18 @@ def main():
         if(R > TEMP_LOWER_LIMIT):
             heater.on() # turn on heater 
             print('heater on')
+            GPIO.output(20, 1)       # set port/pin value to 1/GPIO.HIGH/True  
         #if(temperature > TEMP_UPPER_LIMIT):
         if(R < TEMP_UPPER_LIMIT):
             heater.off() # turn off heater
             print('heater off')
+            GPIO.output(20, 0)       # set port/pin value to 1/GPIO.HIGH/True  
         time.sleep(SAMPLE_INTERVAL)
         # update altitude for next iteration
         current_altitude = altitude(lps.pressure) - offset
         print(current_altitude)
         if (current_altitude < ALTITUDE_DISREEF):
-            break
+            pass # break
         
 
     # dis-reefing altitude reached
