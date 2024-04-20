@@ -17,10 +17,10 @@ SAMPLE_INTERVAL: float = .15 # how often data is sampled (seconds) # TODO:
 ROLLING_AVERAGE_DURATION: float = 10 # number of seconds of data to average # TODO: 
 ROLLING_AVERAGE_SAMPLES: int = math.ceil(ROLLING_AVERAGE_DURATION / SAMPLE_INTERVAL) # number of samples to average
 # heater constants
-TEMP_UPPER_LIMIT: float = 150 # temp at which the heater should be turned off (celsius)
-TEMP_LOWER_LIMIT: float = 130 # temp at which the heater should be turned on (celsius)
-R_UPPER_LIMIT: float = 1770 # resistance at which the heater should be turned off (ohms)
-R_LOWER_LIMIT: float = 2970 # resistance at which the heater should be turned on 
+TEMP_UPPER_LIMIT: float = 200 # temp at which the heater should be turned off (celsius)
+TEMP_LOWER_LIMIT: float = 180 # temp at which the heater should be turned on (celsius)
+R_UPPER_LIMIT: float = 582 # resistance at which the heater should be turned off (ohms)
+R_LOWER_LIMIT: float = 896 # resistance at which the heater should be turned on 
 ALTITUDE_DISREEF: float = 1000 # altitude to start melting the wire (ft) # TODO:
 
 
@@ -40,6 +40,8 @@ nau7802 = NAU7802(board.I2C(), address=0x2A, active_channels=1)
 #     timeout=1
 # )
 nau7802.gain = 1
+
+
 
 
 
@@ -90,6 +92,12 @@ def read_raw_value(samples=2):
 
 
 def main():
+    # init datalogging
+    #file = open("/home/pi/data_log.csv", "a")
+    #i=0
+    #if os.stat("/home/pi/data_log.csv").st_size == 0:
+    #        file.write("Time,Altitude,AccX,AccY,AccZ\n")
+            
     time.sleep(3)
     nau7802.channel=1
     zero_channel()
