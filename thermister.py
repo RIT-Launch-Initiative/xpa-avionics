@@ -156,7 +156,7 @@ def main():
         nau7802.channel=1
         value=read_raw_value()
         V=1.5*float("%7.0f"%value)/(16777215) # convert to voltage
-        print('voltage: ', V)
+        #print('voltage: ', V)
         # TODO convert voltage to temperature
         #temperature = temp(voltage) # convert voltage to temp via lookup table
         R = temp(V) # convert voltage to resistance
@@ -189,7 +189,13 @@ def main():
     print('disreef')
     GPIO.output(20, 1) # turn on heater fully
     # wait for deployment
-    time.sleep(20)
+    while (True):
+        value=read_raw_value()
+        V=1.5*float("%7.0f"%value)/(16777215) # convert to voltage
+        #print('voltage: ', V)
+        R = temp(V)
+        print(R)
+    #time.sleep(20)
     heater.off() # turn off heater
 
 main()
