@@ -28,7 +28,7 @@ ALTITUDE_BOOST: float = 300 # altitude considered to be the boost (ft) # TODO:
 
 # init gpio, i2c
 #apogee_detect = Button(15) # gpio pin to detect apogee from quark
-heater = OutputDevice(20) # gpio pin to activate heater
+#heater = OutputDevice(20) # gpio pin to activate heater
 i2c = board.I2C() # i2c connection to read accelerometer data from icm 20649
 icm = adafruit_icm20x.ICM20649(i2c) # accelerometer object
 lps = adafruit_lps2x.LPS22(i2c) # barometer / altimeter object
@@ -98,8 +98,8 @@ def read_raw_value(samples=2):
 
 def main():
     # init datalogging
-    file = open("/home/pi/data_log.csv", "a")
-    if os.stat("/home/pi/data_log.csv").st_size == 0:
+    file = open("data_log.csv", "a")
+    if os.stat("data_log.csv").st_size == 0:
         file.write("Time,Altitude,Resistance\n")
             
     time.sleep(3)
@@ -116,7 +116,7 @@ def main():
     current_altitude = altitude(lps.pressure) # get altitude from lps sensor
     print(current_altitude)
     now = datetime.now()
-    file.write(str(now)+","+current_altitude+"\n")
+    file.write(str(now)+","+str(current_altitude)+"\n")
     offset = current_altitude
     print(current_altitude - offset)
     
@@ -132,14 +132,14 @@ def main():
         current_altitude = altitude(lps.pressure) - offset
         print(current_altitude)
         now = datetime.now()
-        file.write(str(now)+","+current_altitude+"\n")
+        file.write(str(now)+","+str(current_altitude)+"\n")
         file.flush()
         if current_altitude > ALTITUDE_BOOST: 
             time.sleep(.5)
             current_altitude = altitude(lps.pressure) - offset
             print(current_altitude)
             now = datetime.now()
-            file.write(str(now)+","+current_altitude+"\n")
+            file.write(str(now)+","+str(current_altitude)+"\n")
             file.flush()
             if current_altitude > ALTITUDE_BOOST:
                 now = datetime.now()
@@ -168,7 +168,7 @@ def main():
         n+=1
         if n > 2:
             n-=3
-        file.write(str(now)+","+current_altitude+"\n")
+        file.write(str(now)+","+str(current_altitude)+"\n")
         file.flush()
         time.sleep(.33) # TODO: 
         """ 
@@ -203,19 +203,17 @@ def main():
         # by trying to maintain a temperature range
         #if(temperature < TEMP_LOWER_LIMIT):
         now = datetime.now()
-        file.write(str(now)+","+current_altitude+","+R+"\n")
+        file.write(str(now)+","+str(current_altitude)+","+R+"\n")
         if(R > R_LOWER_LIMIT):
-            heater.on() # turn on heater 
+            GPIO.output(20, 1) # turn on heater 
             print('heater on')
             file.write(str(now)+",HEAT ON\n")
-            GPIO.output(20, 1)       # set port/pin value to 1/GPIO.HIGH/Truex  
         #if(temperature > TEMP_UPPER_LIMIT):
         if(R < R_UPPER_LIMIT):
             flag = 1
-            heater.off() # turn off heater
+            GPIO.output(20, 0) # turn off heater
             print('heater off')
             file.write(str(now)+",HEAT OFF\n")
-            GPIO.output(20, 0)
         file.flush()
         # update altitude for next iteration
         time.sleep(SAMPLE_INTERVAL)
@@ -223,7 +221,7 @@ def main():
         print(current_altitude)
         if (current_altitude < ALTITUDE_DISREEF):
             now = datetime.now()
-            file.write(str(now)+","+current_altitude+"\n")
+            file.write(str(now)+","+str(current_altitude)+"\n")
             break
         
 
@@ -233,6 +231,7 @@ def main():
     
     GPIO.output(20, 1) # turn on heater fully
     # wait for deployment
+    t1 = time.time()
     while (True):
         current_altitude = altitude(lps.pressure) - offset
         value=read_raw_value()
@@ -240,10 +239,15 @@ def main():
         #print('voltage: ', V)
         R = temp(V)
         print(R)
-        file.write(str(now)+","+current_altitude+","+R+"\n")
+        file.write(str(now)+","+str(current_altitude)+","+R+"\n")
+        if (time.time() - t1 > 60):
+            break
+        if (current_altitude < 1000):
+            break
         
-    #time.sleep(20) # TODO: 
-    heater.off() # turn off heater
+    GPIO.output(20, 0) # turn off heater
+    file.write(str(now)+","+str(current_altitude)+"\n")
+    file.write(str(now)+",n")
     file.close()
 
 main()
